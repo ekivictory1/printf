@@ -7,6 +7,4 @@ Eki Victory and Williams Agada
 
 ------------
 
-### End
-
 **Victory & Williams @ ALX software engineering programme 2022.**
