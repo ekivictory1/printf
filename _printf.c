@@ -1,43 +1,51 @@
 #include "main.h"
+
 /**
- * _printf - Print all this parameters
- * @format: input
+ * _printf - formatted output conversion and print data.
+ * @format: input string.
  *
- * Description: function that prints output
- *
- * Return: The output character or num
+ * Return: number of chars printed.
  */
 int _printf(const char *format, ...)
 {
-	int x = 0, o_p = 0;
-	char *ptr = (char *) format, *output_p;
-	int (*ptr_func)(va_list, char *, int);
-	va_list vlist;
+	unsigned int i = 0, len = 0, ibuf = 0;
+	va_list arguments;
+	int (*function)(va_list, char *, unsigned int);
+	char *buffer;
 
-	if (!format)
+	va_start(arguments, format), buffer = malloc(sizeof(char) * 1024);
+	if (!format || !buffer || (format[i] == '%' && !format[i + 1]))
 		return (-1);
-	va_start(vlist, format);
-	output_p = malloc(sizeof(char) * SIZE);
-	if (!output_p)
-		return (1);
-	while (format[x])
+	if (!format[i])
+		return (0);
+	for (i = 0; format && format[i]; i++)
 	{
-		if (format[x] != '%')
-			output_p[o_p] = format[x], o_p++;
-		else if (s_trlen(ptr) != 1)
+		if (format[i] == '%')
 		{
-			ptr_func = format_type(++ptr);
-			if (!ptr_func)
-				output_p[o_p] = format[x], o_p++;
+			if (format[i + 1] == '\0')
+			{	print_buf(buffer, ibuf), free(buffer), va_end(arguments);
+				return (-1);
+			}
 			else
-				o_p = ptr_func(vlist, output_p, o_p), x++;
+			{	function = get_print_func(format, i + 1);
+				if (function == NULL)
+				{
+					if (format[i + 1] == ' ' && !format[i + 2])
+						return (-1);
+					handl_buf(buffer, format[i], ibuf), len++, i--;
+				}
+				else
+				{
+					len += function(arguments, buffer, ibuf);
+					i += ev_print_func(format, i + 1);
+				}
+			} i++;
 		}
 		else
-			o_p = -1;
-		x++, ptr++;
+			handl_buf(buffer, format[i], ibuf), len++;
+		for (ibuf = len; ibuf > 1024; ibuf -= 1024)
+			;
 	}
-	va_end(vlist);
-	write(1, output_p, o_p);
-	free(output_p);
-	return (o_p);
+	print_buf(buffer, ibuf), free(buffer), va_end(arguments);
+	return (len);
 }
